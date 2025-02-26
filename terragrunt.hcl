@@ -1,11 +1,13 @@
-terraform {
-  source = "./github"
-}
+# terragrunt.hcl
 
-inputs = {
-  G_TOKEN            = get_env("G_TOKEN")
-  github_owner       = "Mr3bd"
-  repository_name    = "HelloRepo"
-  repository_members = ["fayezgh"]
-  repository_branches = ["x"]
+
+generate "provider" {
+  path      = "provider.tf"
+  if_exists = "overwrite"
+  contents  = <<EOF
+provider "github" {
+  token = var.G_TOKEN
+  owner = var.github_owner
+}
+EOF
 }
