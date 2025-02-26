@@ -1,0 +1,60 @@
+name: Setup Repo with Terragrunt
+
+on:
+  push:
+    paths:
+      - 'github/variables.tf'
+
+jobs:
+  terragrunt:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Print working directory
+        run: pwd
+
+      - name: List directory contents
+        run: ls -R
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Debug GitHub Token
+        run: |
+          if [[ -z "${{ secrets.G_TOKEN }}" ]]; then 
+            echo "G_TOKEN is EMPTY or NOT SET!";
+          else 
+            echo "G_TOKEN is SET, length: $(echo -n ${{ secrets.G_TOKEN }} | wc -c)";
+          fi
+
+      - name: Terragrunt Init
+        run: terragrunt init
+        working-directory: github
+
+      - name: Check for Repository Name Change
+        id: check_repo_name
+        run: |
+          if git diff --exit-code HEAD^ HEAD -- github/variables.tf; then
+            echo "Repository name unchanged"
+            echo "REPO_NAME_CHANGED=false" >> $GITHUB_ENV
+          else
+            echo "Repository name changed"
+            echo "REPO_NAME_CHANGED=true" >> $GITHUB_ENV
+          fi
+
+      - name: Taint Repository Resource (if name changed)
+        if: env.REPO_NAME_CHANGED == 'true'
+        run: terragrunt taint github_repository.repo
+        working-directory: github
+
+      - name: Terragrunt Plan
+        run: terragrunt plan -var "G_TOKEN=${{ secrets.G_TOKEN }}"
+        working-directory: github
+
+      - name: Terragrunt Apply
+        run: terragrunt apply -auto-approve -var "G_TOKEN=${{ secrets.G_TOKEN }}"
+        working-directory: github
+        env:
+          G_TOKEN: ${{ secrets.G_TOKEN }}
