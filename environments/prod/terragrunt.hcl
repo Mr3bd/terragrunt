@@ -6,7 +6,7 @@ include {
 inputs = {
   G_TOKEN           = "your-github-token" # Replace with your GitHub token or use a secret
   github_owner      = "Mr3bd"
-  repository_name   = "HelloRepo1253-dev"
+  repository_name   = "HelloRepo1253"
   repository_members = ["fayezgh"]
   repository_branches = ["x"]
 }
