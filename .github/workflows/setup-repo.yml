@@ -9,13 +9,25 @@ jobs:
   terraform:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v2
 
-      - name: Set up Terragrunt
-        uses: hashicorp/setup-terraform@v2
+      # Install the latest version of Terragrunt CLI and configure the Terragrunt CLI configuration file with a Terragrunt Cloud user API token
+      - name: Setup Terraform v1.2.6
+        uses: hashicorp/setup-Terraform@v1
         with:
-          terraform_version: "1.5.0" # Replace with your desired Terraform version
+          terraform_version: 1.2.6
+          terraform_wrapper: true
+      - name: Setup Terraform version
+        run: terraform --version
+      - name: Setup Terraform wrapper path
+        run: which terraform
+
+      - name: Setup Terragrunt v0.38.4
+        run: |
+          sudo wget -q -O /bin/terragrunt "https://github.com/gruntwork-io/terragrunt/releases/download/v0.38.4/terragrunt_linux_amd64"
+          sudo chmod +x /bin/terragrunt
+          terragrunt -v
 
       - name: Debug GitHub Token
         run: |
